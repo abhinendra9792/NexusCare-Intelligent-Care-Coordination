@@ -1,0 +1,68 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Environment variables - NEVER COMMIT
+.env
+.env.local
+.env.development
+.env.production
+.env.*.local
+
+# Sensitive configuration files
+check-all-tables.js
+check-schema.js
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+dist/
+build/
+frontend/dist/
+frontend/build/
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+ehthumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.vs/
+
+# Uploads (user uploaded files)
+uploads/*
+!uploads/.gitkeep
+
+# Database files
+*.sql
+*.db
+*.sqlite
+*.dump
+database-schema-share-links.sql
+
+# Test coverage
+coverage/
+.nyc_output/
+*.lcov
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Package locks (optional)
+package-lock.json
+yarn.lock
