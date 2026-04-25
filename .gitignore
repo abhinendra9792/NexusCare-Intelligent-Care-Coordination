@@ -1,19 +1,32 @@
-# Dependencies
+# =============================================
+#  HealthCare Vault — .gitignore
+# =============================================
+
+# ---------- Dependencies ----------
 node_modules/
 frontend/node_modules/
 
-# Environment variables - NEVER COMMIT
+# ---------- Environment Variables (NEVER COMMIT) ----------
 .env
 .env.local
 .env.development
 .env.production
 .env.*.local
+Backend/.env
 
-# Sensitive configuration files
+# ---------- Sensitive / Debug Scripts ----------
 check-all-tables.js
 check-schema.js
+create-share-tables.js
+fix-chat-table.js
+reset-db.js
+test-db.js
+test-gemini.js
+test-nano-banana.js
+Backend/create-test-user.js
+Backend/test-db-connection.js
 
-# Logs
+# ---------- Logs ----------
 logs/
 *.log
 npm-debug.log*
@@ -21,13 +34,13 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Build outputs
+# ---------- Build Outputs ----------
 dist/
 build/
 frontend/dist/
 frontend/build/
 
-# OS files
+# ---------- OS Files ----------
 .DS_Store
 Thumbs.db
 *.swp
@@ -35,34 +48,38 @@ Thumbs.db
 ehthumbs.db
 desktop.ini
 
-# IDE
+# ---------- IDE / Editor ----------
 .vscode/
 .idea/
 *.sublime-project
 *.sublime-workspace
 .vs/
 
-# Uploads (user uploaded files)
+# ---------- Uploads (user uploaded medical files) ----------
 uploads/*
 !uploads/.gitkeep
 
-# Database files
+# ---------- Database Files ----------
 *.sql
 *.db
 *.sqlite
 *.dump
 database-schema-share-links.sql
 
-# Test coverage
+# ---------- Test Coverage ----------
 coverage/
 .nyc_output/
 *.lcov
 
-# Temporary files
+# ---------- Temporary Files ----------
 tmp/
 temp/
 *.tmp
 
-# Package locks (optional)
+# ---------- Package Locks ----------
 package-lock.json
+frontend/package-lock.json
 yarn.lock
+
+# ---------- Gemini / AI Tool Caches ----------
+.gemini/

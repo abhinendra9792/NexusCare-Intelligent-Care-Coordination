@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import './styles.css';
 import LandingPage from './components/LandingPage';
 import LoginVault from './components/LoginVault';
-import HealthVault from './components/HealthVault';
+import ComprehensiveDashboard from './components/ComprehensiveDashboard';
 
 function App() {
   const [view, setView] = useState('landing'); // 'landing', 'login', 'dashboard', 'share'
@@ -48,7 +48,8 @@ function App() {
 
   // If already logged in, show dashboard directly
   if (isLoggedIn) {
-    return <HealthVault onLogout={handleLogout} />;
+    const user = JSON.parse(localStorage.getItem('user_data') || '{}');
+    return <ComprehensiveDashboard user={user} onLogout={handleLogout} />;
   }
 
   // Show login or landing based on view

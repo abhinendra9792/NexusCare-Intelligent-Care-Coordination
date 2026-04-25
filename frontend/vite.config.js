@@ -4,7 +4,8 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 5173,
+    port: 3000,
+    host: 'localhost',
     // Hot reload on file changes
     hmr: true,
     // Force reload on CSS changes
