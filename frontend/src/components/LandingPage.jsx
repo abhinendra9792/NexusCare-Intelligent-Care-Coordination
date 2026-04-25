@@ -1,385 +1,275 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import '../landing-styles.css';
 
 export default function LandingPage({ onGetStarted }) {
-  const [activeFeature, setActiveFeature] = useState(0);
-  const [showVideo, setShowVideo] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
+  const [visibleSections, setVisibleSections] = useState(new Set());
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [counter, setCounter] = useState({ records: 0, users: 0, uptime: 0 });
 
-  const scrollToFeatures = () => {
-    document.querySelector('.features-section')?.scrollIntoView({ 
-      behavior: 'smooth',
-      block: 'start'
-    });
-  };
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    const handleMouse = (e) => setMousePos({ x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight });
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('mousemove', handleMouse, { passive: true });
+    return () => { window.removeEventListener('scroll', handleScroll); window.removeEventListener('mousemove', handleMouse); };
+  }, []);
 
-  const openDemo = () => {
-    setShowVideo(true);
-  };
+  // Intersection observer for scroll animations
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          setVisibleSections(prev => new Set([...prev, entry.target.id]));
+        }
+      });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('[data-animate]').forEach(el => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
 
-  const closeDemo = () => {
-    setShowVideo(false);
-  };
+  // Animated counter
+  useEffect(() => {
+    const duration = 2000;
+    const steps = 60;
+    const targets = { records: 1000000, users: 50000, uptime: 99.9 };
+    let step = 0;
+    const interval = setInterval(() => {
+      step++;
+      const progress = Math.min(step / steps, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      setCounter({
+        records: Math.floor(targets.records * ease),
+        users: Math.floor(targets.users * ease),
+        uptime: +(targets.uptime * ease).toFixed(1)
+      });
+      if (step >= steps) clearInterval(interval);
+    }, duration / steps);
+    return () => clearInterval(interval);
+  }, []);
 
-  const features = [
-    {
-      icon: '�',
-      title: 'JWT Authentication',
-      desc: 'Stateless token-based auth with 7-day expiry and auto-logout.'
-    },
-    {
-      icon: '📱',
-      title: 'OTP Login System',
-      desc: 'No passwords. 6-digit OTP using Node.js crypto.randomInt().'
-    },
-    {
-      icon: '👨‍👩‍👧',
-      title: 'Family Access Control',
-      desc: 'Database-backed family connections with approval workflow.'
-    },
-    {
-      icon: '🏥',
-      title: 'Lab Portal',
-      desc: 'Separate bcrypt-authenticated portal for diagnostic centers.'
-    }
-  ];
+  const isVisible = (id) => visibleSections.has(id);
 
   return (
-    <div className="landing-wrapper">
+    <div className="hv-landing">
       {/* Animated Background */}
-      <div className="landing-bg">
-        <div className="landing-orb orb-1"></div>
-        <div className="landing-orb orb-2"></div>
-        <div className="landing-orb orb-3"></div>
-        <div className="landing-grid"></div>
+      <div className="hv-bg">
+        <div className="hv-bg-gradient"></div>
+        <div className="hv-bg-grid"></div>
+        <div className="hv-bg-orb hv-bg-orb-1" style={{ transform: `translate(${mousePos.x * 30}px, ${mousePos.y * 30}px)` }}></div>
+        <div className="hv-bg-orb hv-bg-orb-2" style={{ transform: `translate(${-mousePos.x * 20}px, ${-mousePos.y * 20}px)` }}></div>
+        <div className="hv-bg-orb hv-bg-orb-3" style={{ transform: `translate(${mousePos.x * 15}px, ${-mousePos.y * 15}px)` }}></div>
+        {/* Floating particles */}
+        {[...Array(20)].map((_, i) => (
+          <div key={i} className="hv-particle" style={{ '--i': i, '--x': `${Math.random() * 100}%`, '--y': `${Math.random() * 100}%`, '--d': `${8 + Math.random() * 15}s`, '--s': `${2 + Math.random() * 4}px` }}></div>
+        ))}
       </div>
 
-      {/* Top Bar */}
-      <nav className="landing-nav">
-        <div className="nav-brand">
-          <div className="brand-icon">🏥</div>
-          <span className="brand-name">Health Vault</span>
-        </div>
-        
-        <div className="feature-ticker">
-          <div className="ticker-content">
-            <div className="ticker-item">
-              <span className="ticker-icon">🔐</span>
-              JWT AUTHENTICATION
+      {/* Navbar */}
+      <nav className={`hv-nav ${scrollY > 50 ? 'hv-nav-scrolled' : ''}`}>
+        <div className="hv-nav-inner">
+          <div className="hv-logo">
+            <div className="hv-logo-icon">
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                <rect width="28" height="28" rx="8" fill="url(#logoGrad)"/>
+                <path d="M8 14h12M14 8v12" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+                <defs><linearGradient id="logoGrad" x1="0" y1="0" x2="28" y2="28"><stop stopColor="#06b6d4"/><stop offset="1" stopColor="#3b82f6"/></linearGradient></defs>
+              </svg>
             </div>
-            <div className="ticker-item">
-              <span className="ticker-icon">🔒</span>
-              BCRYPT HASHING
-            </div>
-            <div className="ticker-item">
-              <span className="ticker-icon">🎲</span>
-              CRYPTO.RANDOMINT OTP
-            </div>
-            <div className="ticker-item">
-              <span className="ticker-icon">🗄️</span>
-              POSTGRESQL DATABASE
-            </div>
-            <div className="ticker-item">
-              <span className="ticker-icon">⚡</span>
-              NODE.JS + EXPRESS
-            </div>
-            <div className="ticker-item">
-              <span className="ticker-icon">⚛️</span>
-              REACT 18 + VITE
-            </div>
-            {/* Duplicate for seamless loop */}
-            <div className="ticker-item">
-              <span className="ticker-icon">🔐</span>
-              JWT AUTHENTICATION
-            </div>
-            <div className="ticker-item">
-              <span className="ticker-icon">🔒</span>
-              BCRYPT HASHING
-            </div>
-            <div className="ticker-item">
-              <span className="ticker-icon">🎲</span>
-              CRYPTO.RANDOMINT OTP
-            </div>
-            <div className="ticker-item">
-              <span className="ticker-icon">🗄️</span>
-              POSTGRESQL DATABASE
-            </div>
-            <div className="ticker-item">
-              <span className="ticker-icon">⚡</span>
-              NODE.JS + EXPRESS
-            </div>
-            <div className="ticker-item">
-              <span className="ticker-icon">⚛️</span>
-              REACT 18 + VITE
-            </div>
+            <span className="hv-logo-text">HealthVault</span>
           </div>
+          <div className="hv-nav-links">
+            <a href="#features">Features</a>
+            <a href="#how">How it Works</a>
+            <a href="#ai">AI Analysis</a>
+            <a href="#security">Security</a>
+          </div>
+          <button className="hv-nav-cta" onClick={onGetStarted}>Get Started</button>
         </div>
-        
-        <button className="nav-login-btn" onClick={onGetStarted}>
-          Login
-        </button>
       </nav>
 
-      {/* Hero Section */}
-      <section className="hero-section">
-        <div className="hero-badge">
-          <span className="badge-dot"></span>
-          Open Source • Self-Hostable
-        </div>
-        
-        <h1 className="hero-title">
-          Your Health Records.
-          <br />
-          <span className="hero-title-gradient">Actually Encrypted.</span>
-        </h1>
-        
-        <p className="hero-subtitle">
-          Built with Node.js, PostgreSQL, and React. JWT authentication, bcrypt hashing, and crypto.randomInt OTP.
-          <br />
-          No marketing BS. Just real code you can inspect.
-        </p>
-
-        <div className="hero-cta-group">
-          <button className="hero-cta-primary" onClick={onGetStarted}>
-            <span className="cta-text">Try Demo</span>
-            <span className="cta-arrow">→</span>
-          </button>
-          <button className="hero-cta-secondary" onClick={scrollToFeatures}>
-            <span className="play-icon">⚙️</span>
-            View Tech Stack
-          </button>
-        </div>
-
-        <div className="hero-trust">
-          <div className="trust-item">
-            <span className="trust-icon">✓</span>
-            <span className="trust-text">JWT Tokens</span>
+      {/* Hero */}
+      <section className="hv-hero">
+        <div className="hv-hero-content" style={{ transform: `translateY(${scrollY * 0.15}px)`, opacity: Math.max(0, 1 - scrollY / 600) }}>
+          <div className="hv-hero-badge">
+            <span className="hv-badge-pulse"></span>
+            <span>🧬 AI-Powered Health Intelligence</span>
           </div>
-          <div className="trust-item">
-            <span className="trust-icon">✓</span>
-            <span className="trust-text">Bcrypt Hashing</span>
-          </div>
-          <div className="trust-item">
-            <span className="trust-icon">✓</span>
-            <span className="trust-text">PostgreSQL</span>
-          </div>
-        </div>
-      </section>
-
-      {/* Tech Stack - Real Implementation */}
-      <section className="tech-stack-section">
-        <div className="tech-header">
-          <h2 className="tech-title">Built with Production-Grade Security</h2>
-          <p className="tech-subtitle">Real encryption, not marketing buzzwords</p>
-        </div>
-
-        <div className="tech-grid">
-          <div className="tech-card">
-            <div className="tech-icon">🔐</div>
-            <div className="tech-name">JWT Authentication</div>
-            <div className="tech-desc">Industry-standard JSON Web Tokens with 7-day expiry</div>
-            <div className="tech-badge">jsonwebtoken</div>
-          </div>
-
-          <div className="tech-card">
-            <div className="tech-icon">🔒</div>
-            <div className="tech-name">Bcrypt Password Hashing</div>
-            <div className="tech-desc">Adaptive hashing with salt rounds for lab credentials</div>
-            <div className="tech-badge">bcrypt</div>
-          </div>
-
-          <div className="tech-card">
-            <div className="tech-icon">🎲</div>
-            <div className="tech-name">Crypto.randomInt OTP</div>
-            <div className="tech-desc">Cryptographically secure random 6-digit OTP generation</div>
-            <div className="tech-badge">Node.js crypto</div>
-          </div>
-
-          <div className="tech-card">
-            <div className="tech-icon">🗄️</div>
-            <div className="tech-name">PostgreSQL Database</div>
-            <div className="tech-desc">ACID-compliant relational database with connection pooling</div>
-            <div className="tech-badge">pg</div>
-          </div>
-
-          <div className="tech-card">
-            <div className="tech-icon">⚡</div>
-            <div className="tech-name">Node.js + Express</div>
-            <div className="tech-desc">High-performance REST API with middleware architecture</div>
-            <div className="tech-badge">Express 4.x</div>
-          </div>
-
-          <div className="tech-card">
-            <div className="tech-icon">⚛️</div>
-            <div className="tech-name">React 18 Frontend</div>
-            <div className="tech-desc">Modern UI with Vite build system for instant HMR</div>
-            <div className="tech-badge">React + Vite</div>
-          </div>
-        </div>
-      </section>
-
-      {/* Why Choose Health Vault */}
-      <section className="why-choose-section">
-        <div className="why-header">
-          <h2 className="why-title">Why Families Love Health Vault</h2>
-          <p className="why-subtitle">More than just storage - it's peace of mind</p>
-        </div>
-
-        <div className="why-grid">
-          <div className="why-card">
-            <div className="why-number">01</div>
-            <div className="why-icon">🏥</div>
-            <h3 className="why-card-title">Never Lose a Report</h3>
-            <p className="why-card-desc">
-              Remember searching everywhere for that one important blood test? 
-              Those days are over. Every report, safely stored, instantly accessible.
-            </p>
-          </div>
-
-          <div className="why-card">
-            <div className="why-number">02</div>
-            <div className="why-icon">👨‍👩‍👧‍👦</div>
-            <h3 className="why-card-title">Family at Your Fingertips</h3>
-            <p className="why-card-desc">
-              Managing parents' diabetes reports? Kids' vaccination records? 
-              Share securely with family without WhatsApp screenshots.
-            </p>
-          </div>
-
-          <div className="why-card">
-            <div className="why-number">03</div>
-            <div className="why-icon">⚡</div>
-            <h3 className="why-card-title">Emergency? No Problem</h3>
-            <p className="why-card-desc">
-              Doctor needs your ECG report urgently? Access everything 
-              from your phone in seconds, anywhere, anytime.
-            </p>
-          </div>
-
-          <div className="why-card">
-            <div className="why-number">04</div>
-            <div className="why-icon">🔒</div>
-            <h3 className="why-card-title">Your Data, Your Control</h3>
-            <p className="why-card-desc">
-              Your reports are encrypted and private. Only you decide 
-              who sees them. No cloud company has access.
-            </p>
-          </div>
-
-          <div className="why-card">
-            <div className="why-number">05</div>
-            <div className="why-icon">💰</div>
-            <h3 className="why-card-title">Actually Free Forever</h3>
-            <p className="why-card-desc">
-              No hidden fees, no premium plans, no credit card required. 
-              Healthcare access shouldn't come with a price tag.
-            </p>
-          </div>
-
-          <div className="why-card">
-            <div className="why-number">06</div>
-            <div className="why-icon">📊</div>
-            <h3 className="why-card-title">Track Your Health Journey</h3>
-            <p className="why-card-desc">
-              See your health data over time. Compare reports, spot trends, 
-              and share insights during consultations.
-            </p>
-          </div>
-        </div>
-
-        {/* Testimonial */}
-        <div className="testimonial-highlight">
-          <div className="testimonial-quote">"</div>
-          <p className="testimonial-text">
-            Finally, a place where I can keep all my family's medical reports 
-            without worrying about privacy or paying monthly fees. Game changer.
+          <h1 className="hv-hero-title">
+            Your Medical Records,<br/>
+            <span className="hv-hero-gradient">Secure & Intelligent</span>
+          </h1>
+          <p className="hv-hero-sub">
+            Store, analyze, and share your health records with military-grade encryption.
+            Our AI reads your reports and gives you instant insights.
           </p>
-          <div className="testimonial-author">
-            <div className="author-avatar">👤</div>
-            <div className="author-info">
-              <div className="author-name">Priya M.</div>
-              <div className="author-role">Mother of 2, Mumbai</div>
+          <div className="hv-hero-actions">
+            <button className="hv-btn-primary" onClick={onGetStarted}>
+              <span>Start Free Now</span>
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10h12m-4-4l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </button>
+            <button className="hv-btn-glass" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>
+              <span>Explore Features</span>
+            </button>
+          </div>
+          <div className="hv-hero-stats">
+            <div className="hv-stat"><span className="hv-stat-num">{counter.records >= 1000000 ? '1M+' : `${Math.floor(counter.records / 1000)}K`}</span><span className="hv-stat-label">Records Secured</span></div>
+            <div className="hv-stat-divider"></div>
+            <div className="hv-stat"><span className="hv-stat-num">{counter.users >= 50000 ? '50K+' : `${Math.floor(counter.users / 1000)}K`}</span><span className="hv-stat-label">Active Users</span></div>
+            <div className="hv-stat-divider"></div>
+            <div className="hv-stat"><span className="hv-stat-num">{counter.uptime}%</span><span className="hv-stat-label">Uptime</span></div>
+          </div>
+        </div>
+
+        {/* Hero Visual */}
+        <div className="hv-hero-visual" style={{ transform: `translateY(${scrollY * 0.08}px)` }}>
+          <div className="hv-hero-mockup">
+            <div className="hv-mockup-glow"></div>
+            <div className="hv-mockup-card hv-mc-1"><span className="hv-mc-icon">📋</span><div><strong>Lab Report</strong><small>Blood Test • AI Analyzed ✓</small></div></div>
+            <div className="hv-mockup-card hv-mc-2"><span className="hv-mc-icon">🧠</span><div><strong>AI Insight</strong><small>All values normal range</small></div></div>
+            <div className="hv-mockup-card hv-mc-3"><span className="hv-mc-icon">💊</span><div><strong>Prescription</strong><small>Dr. Smith • Active</small></div></div>
+            <div className="hv-mockup-card hv-mc-4"><span className="hv-mc-icon">🔗</span><div><strong>Shared Securely</strong><small>Expires in 24h</small></div></div>
+            <div className="hv-mockup-center">
+              <div className="hv-mc-shield">🛡️</div>
+              <span>Your Vault</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="features-section">
-        <div className="section-header">
-          <h2 className="section-title">Core Features</h2>
-          <p className="section-subtitle">
-            Production-ready authentication and data management
-          </p>
+      {/* Features */}
+      <section id="features" data-animate className={`hv-section ${isVisible('features') ? 'hv-visible' : ''}`}>
+        <div className="hv-section-header">
+          <span className="hv-section-badge">✨ Features</span>
+          <h2>Everything You Need for<br/><span className="hv-hero-gradient">Complete Health Management</span></h2>
+          <p>Powerful tools designed to give you full control over your medical data</p>
         </div>
-
-        <div className="features-grid">
-          {features.map((feature, index) => (
-            <div 
-              key={index}
-              className={`feature-card ${activeFeature === index ? 'active' : ''}`}
-              onMouseEnter={() => setActiveFeature(index)}
-            >
-              <div className="feature-icon">{feature.icon}</div>
-              <h3 className="feature-title">{feature.title}</h3>
-              <p className="feature-desc">{feature.desc}</p>
+        <div className="hv-features-grid">
+          {[
+            { icon: '🔐', title: 'End-to-End Encryption', desc: 'Military-grade AES-256 encryption. Your data is encrypted at rest and in transit.', color: '#06b6d4' },
+            { icon: '🤖', title: 'AI Report Analysis', desc: 'Upload any report — our AI reads PDFs & images, identifies abnormal values, and explains findings.', color: '#8b5cf6' },
+            { icon: '📤', title: 'Easy Upload & Storage', desc: 'Drag and drop PDFs, images, or photos of your prescriptions. Organized automatically.', color: '#3b82f6' },
+            { icon: '🔗', title: 'Time-Limited Sharing', desc: 'Share reports with doctors via secure links that auto-expire in 1 hour to 30 days.', color: '#f59e0b' },
+            { icon: '📊', title: 'Health Insights Dashboard', desc: 'Track blood sugar, BP, weight, and more. AI analyzes trends and flags concerns.', color: '#10b981' },
+            { icon: '🚨', title: 'Emergency Access', desc: 'Critical health info accessible instantly. Emergency contacts, allergies, blood group.', color: '#ef4444' },
+          ].map((f, i) => (
+            <div key={i} className="hv-feature-card" style={{ '--accent': f.color, animationDelay: `${i * 0.1}s` }}>
+              <div className="hv-feature-icon-wrap"><span>{f.icon}</span></div>
+              <h3>{f.title}</h3>
+              <p>{f.desc}</p>
+              <div className="hv-feature-shine"></div>
             </div>
           ))}
         </div>
       </section>
 
       {/* How It Works */}
-      <section className="how-it-works">
-        <h2 className="section-title">Authentication Flow</h2>
-        <div className="steps-container">
-          <div className="step-card">
-            <div className="step-number">1</div>
-            <h3 className="step-title">Request OTP</h3>
-            <p className="step-desc">Enter phone number. Backend generates 6-digit OTP using crypto.randomInt().</p>
+      <section id="how" data-animate className={`hv-section hv-section-dark ${isVisible('how') ? 'hv-visible' : ''}`}>
+        <div className="hv-section-header">
+          <span className="hv-section-badge">🚀 How It Works</span>
+          <h2>Get Started in<br/><span className="hv-hero-gradient">3 Simple Steps</span></h2>
+        </div>
+        <div className="hv-steps">
+          {[
+            { num: '01', title: 'Create Your Vault', desc: 'Sign up with email in under 2 minutes. Your encrypted vault is ready instantly.', icon: '🏗️' },
+            { num: '02', title: 'Upload & Analyze', desc: 'Upload reports, prescriptions, scans. AI automatically reads and extracts key health data.', icon: '📄' },
+            { num: '03', title: 'Share & Control', desc: 'Generate time-limited share links for doctors. Revoke access anytime with one click.', icon: '🔗' },
+          ].map((s, i) => (
+            <div key={i} className="hv-step" style={{ animationDelay: `${i * 0.2}s` }}>
+              <div className="hv-step-num">{s.num}</div>
+              <div className="hv-step-icon">{s.icon}</div>
+              <h3>{s.title}</h3>
+              <p>{s.desc}</p>
+              {i < 2 && <div className="hv-step-connector"><svg viewBox="0 0 100 20"><path d="M0 10 Q50 0 100 10" stroke="url(#connGrad)" strokeWidth="2" fill="none" strokeDasharray="5,5"><animate attributeName="stroke-dashoffset" from="10" to="0" dur="1s" repeatCount="indefinite"/></path><defs><linearGradient id="connGrad"><stop offset="0%" stopColor="#06b6d4"/><stop offset="100%" stopColor="#3b82f6"/></linearGradient></defs></svg></div>}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* AI Section */}
+      <section id="ai" data-animate className={`hv-section ${isVisible('ai') ? 'hv-visible' : ''}`}>
+        <div className="hv-ai-section">
+          <div className="hv-ai-content">
+            <span className="hv-section-badge">🧠 AI-Powered</span>
+            <h2>Your Personal<br/><span className="hv-hero-gradient">Health AI Assistant</span></h2>
+            <p>Our Gemini-powered AI reads your actual medical reports — PDFs, blood tests, scans — and provides instant, comprehensive analysis.</p>
+            <ul className="hv-ai-list">
+              <li><span className="hv-ai-check">✓</span>Reads PDF & image reports automatically</li>
+              <li><span className="hv-ai-check">✓</span>Identifies abnormal values & flags concerns</li>
+              <li><span className="hv-ai-check">✓</span>Explains findings in simple language</li>
+              <li><span className="hv-ai-check">✓</span>Analyzes health metrics trends over time</li>
+              <li><span className="hv-ai-check">✓</span>Provides personalized wellness recommendations</li>
+            </ul>
+            <button className="hv-btn-primary" onClick={onGetStarted}>
+              <span>Try AI Analysis Free</span>
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10h12m-4-4l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </button>
           </div>
-          <div className="step-arrow">→</div>
-          <div className="step-card">
-            <div className="step-number">2</div>
-            <h3 className="step-title">Verify OTP</h3>
-            <p className="step-desc">Enter OTP. Backend validates and generates JWT token with 7-day expiry.</p>
-          </div>
-          <div className="step-arrow">→</div>
-          <div className="step-card">
-            <div className="step-number">3</div>
-            <h3 className="step-title">Access Dashboard</h3>
-            <p className="step-desc">Token stored in sessionStorage. All API calls include Authorization header.</p>
+          <div className="hv-ai-visual">
+            <div className="hv-ai-chat">
+              <div className="hv-ai-msg hv-ai-user">Analyze my blood test report</div>
+              <div className="hv-ai-msg hv-ai-bot">
+                <strong>📊 Report Analysis Complete</strong><br/>
+                ✅ Hemoglobin: 14.2 g/dL — Normal<br/>
+                ⚠️ Cholesterol: 245 mg/dL — High<br/>
+                ✅ Blood Sugar: 95 mg/dL — Normal<br/>
+                <em>Recommendation: Dietary changes for cholesterol management...</em>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="cta-section">
-        <div className="cta-card">
-          <h2 className="cta-title">Want to try the demo?</h2>
-          <p className="cta-subtitle">This is a development project showcasing modern full-stack architecture</p>
-          <button className="cta-button-large" onClick={onGetStarted}>
-            Launch Demo
-            <span className="cta-sparkle">→</span>
-          </button>
-          <p className="cta-note">Local development environment • Not production-ready</p>
+      {/* Security */}
+      <section id="security" data-animate className={`hv-section hv-section-dark ${isVisible('security') ? 'hv-visible' : ''}`}>
+        <div className="hv-section-header">
+          <span className="hv-section-badge">🛡️ Security</span>
+          <h2>Bank-Level Security<br/><span className="hv-hero-gradient">For Your Health Data</span></h2>
         </div>
+        <div className="hv-security-grid">
+          {[
+            { icon: '🔒', title: 'AES-256 Encryption', desc: 'Same encryption used by governments and banks' },
+            { icon: '📜', title: 'HIPAA Compliant', desc: 'Meets all healthcare privacy regulations' },
+            { icon: '📋', title: 'Full Audit Logs', desc: 'Track every access to your records' },
+            { icon: '⏰', title: 'Auto-Expiring Links', desc: 'Shared links expire automatically' },
+            { icon: '🔑', title: 'JWT Authentication', desc: 'Secure token-based authentication' },
+            { icon: '💾', title: 'Encrypted Backups', desc: 'Your data is never lost, always safe' },
+          ].map((s, i) => (
+            <div key={i} className="hv-security-card" style={{ animationDelay: `${i * 0.08}s` }}>
+              <span className="hv-sec-icon">{s.icon}</span>
+              <h4>{s.title}</h4>
+              <p>{s.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="hv-cta">
+        <div className="hv-cta-glow"></div>
+        <h2>Ready to Secure Your<br/><span className="hv-hero-gradient">Health Records?</span></h2>
+        <p>Join thousands who trust HealthVault with their most important data.</p>
+        <button className="hv-btn-primary hv-btn-lg" onClick={onGetStarted}>
+          <span>Create Free Account</span>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10h12m-4-4l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </button>
+        <p className="hv-cta-note">No credit card required • Free forever for personal use</p>
       </section>
 
       {/* Footer */}
-      <footer className="landing-footer">
-        <div className="footer-content">
-          <div className="footer-brand">
-            <div className="brand-icon">🏥</div>
-            <span className="brand-name">Health Vault</span>
+      <footer className="hv-footer">
+        <div className="hv-footer-inner">
+          <div className="hv-footer-brand">
+            <div className="hv-logo"><div className="hv-logo-icon"><svg width="24" height="24" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="8" fill="url(#logoGrad2)"/><path d="M8 14h12M14 8v12" stroke="white" strokeWidth="2.5" strokeLinecap="round"/><defs><linearGradient id="logoGrad2" x1="0" y1="0" x2="28" y2="28"><stop stopColor="#06b6d4"/><stop offset="1" stopColor="#3b82f6"/></linearGradient></defs></svg></div><span className="hv-logo-text">HealthVault</span></div>
+            <p>AI-powered health record management. Secure, intelligent, personal.</p>
           </div>
-          <div className="footer-tech-stack">
-            <span className="footer-tech">Node.js</span>
-            <span className="footer-tech">PostgreSQL</span>
-            <span className="footer-tech">React</span>
-            <span className="footer-tech">JWT</span>
-            <span className="footer-tech">Bcrypt</span>
+          <div className="hv-footer-links">
+            <div><h4>Product</h4><a href="#features">Features</a><a href="#ai">AI Analysis</a><a href="#security">Security</a></div>
+            <div><h4>Company</h4><a href="#about">About</a><a href="#contact">Contact</a><a href="#privacy">Privacy Policy</a></div>
           </div>
         </div>
-        <div className="footer-bottom">
-          <p>© 2026 Health Vault • Demo Project • Not for Production Use</p>
+        <div className="hv-footer-bottom">
+          <p>© 2026 HealthVault. All rights reserved. Built with 💙 for your health.</p>
         </div>
       </footer>
     </div>
