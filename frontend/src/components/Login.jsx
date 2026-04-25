@@ -1,280 +1,174 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 
-function Login({ onLoginSuccess }) {
-  const [phone, setPhone] = useState('');
-  const [isFocused, setIsFocused] = useState(false);
+function Login({ onLoginSuccess, onSwitch }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
-  const [showOTPBox, setShowOTPBox] = useState(false);
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [isVerifying, setIsVerifying] = useState(false);
-  const otpRefs = useRef([]);
 
-  const handlePhoneChange = (e) => {
-    const value = e.target.value.replace(/\D/g, '');
-    if (value.length <= 10) {
-      setPhone(value);
-    }
-    // Clear message when user types
-    if (message.text) {
-      setMessage({ type: '', text: '' });
-    }
-  };
+  const API_URL = 'http://localhost:5000/api/auth';
 
-  const handleSendOTP = async (e) => {
-    e.preventDefault();
-    
-    if (phone.length !== 10) return;
-
-    setIsLoading(true);
+  const handleLogin = async (e) => {
+    if (e) e.preventDefault();
     setMessage({ type: '', text: '' });
 
-    try {
-      const response = await fetch('http://localhost:3000/api/auth/request-otp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          phone: '+91' + phone
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage({
-          type: 'success',
-          text: '✅ OTP sent! Check terminal for code (SMS not integrated yet)'
-        });
-        setShowOTPBox(true);
-        // Focus first OTP input
-        setTimeout(() => {
-          otpRefs.current[0]?.focus();
-        }, 100);
-      } else {
-        setMessage({
-          type: 'error',
-          text: data.error || '❌ Failed to send OTP. Please try again.'
-        });
-      }
-    } catch (error) {
-      setMessage({
-        type: 'error',
-        text: '❌ Network error. Please check your connection.'
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const isValidPhone = phone.length === 10;
-
-  const handleOTPChange = (index, value) => {
-    if (value && !/^\d$/.test(value)) return;
-    
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-    
-    if (value && index < 5) {
-      otpRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleOTPKeyDown = (index, e) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      otpRefs.current[index - 1]?.focus();
-    }
-  };
-
-  const handleVerifyOTP = async () => {
-    const otpValue = otp.join('');
-    if (otpValue.length !== 6) {
-      setMessage({ type: 'error', text: '❌ Please enter all 6 digits' });
+    if (!email || !password) {
+      setMessage({ type: 'error', text: '❌ Email and password are required' });
       return;
     }
 
-    setIsVerifying(true);
+    setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3000/api/auth/verify-otp', {
+      const response = await fetch(`${API_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: '+91' + phone, otp: otpValue }),
+        body: JSON.stringify({ email, password })
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        // Use sessionStorage - clears when browser closes for better privacy
         sessionStorage.setItem('auth_token', data.token);
-        setMessage({ type: 'success', text: '✅ Login successful!' });
+        sessionStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('user_data', JSON.stringify(data.user));
+        setMessage({ type: 'success', text: '✅ Login successful! Redirecting...' });
         setTimeout(() => {
           onLoginSuccess();
-        }, 1500);
+        }, 1000);
       } else {
-        setMessage({ type: 'error', text: data.message || '❌ Invalid OTP' });
-        setOtp(['', '', '', '', '', '']);
-        otpRefs.current[0]?.focus();
+        setMessage({ type: 'error', text: `❌ ${data.error || 'Login failed'}` });
       }
     } catch (error) {
-      setMessage({ type: 'error', text: '❌ Network error. Please try again.' });
+      console.error('Error:', error);
+      setMessage({ type: 'error', text: '❌ Network error. Make sure backend is running on port 5000' });
     } finally {
-      setIsVerifying(false);
+      setIsLoading(false);
     }
   };
 
-  const handleChangeNumber = () => {
-    setShowOTPBox(false);
-    setOtp(['', '', '', '', '', '']);
-    setPhone('');
-    setMessage({ type: '', text: '' });
-  };
-
-  const handleResendOTP = async () => {
-    setIsLoading(true);
-    setOtp(['', '', '', '', '', '']);
-    
-    try {
-      const response = await fetch('http://localhost:3000/api/auth/request-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: '+91' + phone }),
-      });
-
-      if (response.ok) {
-        setMessage({ type: 'success', text: '✅ New OTP sent! Check terminal' });
-        otpRefs.current[0]?.focus();
-      } else {
-        setMessage({ type: 'error', text: '❌ Failed to resend OTP' });
-      }
-    } catch (error) {
-      setMessage({ type: 'error', text: '❌ Network error' });
-    } finally {
-      setIsLoading(false);
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && email && password && !isLoading) {
+      handleLogin(e);
     }
   };
 
   return (
-    <div className="login-container">
-      <div className="background-shapes">
-        <div className="shape shape-1"></div>
-        <div className="shape shape-2"></div>
-        <div className="shape shape-3"></div>
-      </div>
-      
-      <div className="login-card">
-        <div className="logo">
-          <div className="logo-icon">🏥</div>
-          <h2>Health Vault</h2>
+    <div className="vault-login-container">
+      <div className="vault-login-card">
+        {/* Logo */}
+        <div className="vault-login-logo">
+          <div className="vault-login-logo-ring">
+            <div className="vault-login-logo-inner">🏥</div>
+          </div>
+          <h2 className="vault-login-brand">Health Vault</h2>
         </div>
 
-        <h1 className="page-title">Welcome Back!</h1>
-        <p className="subtitle">Access your health records securely</p>
+        {/* Welcome */}
+        <div className="vault-login-hero">
+          <h1>Welcome Back!</h1>
+          <p>Access your health records securely</p>
+        </div>
 
-        <div className="login-form">
-          <div className="input-label">📱 Phone Number</div>
-          
-          <div className={`phone-input-group ${isFocused ? 'focused' : ''} ${isValidPhone ? 'valid' : ''}`}>
-            <div className="country-code">+91</div>
+        {/* Form */}
+        <form className="vault-login-form" onSubmit={handleLogin}>
+          {/* Email */}
+          <div className="vault-form-group">
+            <label className="vault-form-label">📧 Email Address</label>
             <input
-              type="tel"
-              className="phone-input"
-              placeholder="Enter your mobile number"
-              value={phone}
-              onChange={handlePhoneChange}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-              maxLength={10}
+              type="email"
+              className="vault-form-input"
+              placeholder="your.email@gmail.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={handleKeyDown}
+              disabled={isLoading}
+              autoFocus
+              id="login-email"
             />
-            {isValidPhone && <span className="check-icon">✓</span>}
           </div>
 
+          {/* Password */}
+          <div className="vault-form-group">
+            <label className="vault-form-label">🔐 Password</label>
+            <div className="vault-password-wrapper">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                className="vault-form-input"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={handleKeyDown}
+                disabled={isLoading}
+                id="login-password"
+              />
+              <button
+                type="button"
+                className="vault-password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex={-1}
+              >
+                {showPassword ? '🙈' : '👁️'}
+              </button>
+            </div>
+          </div>
+
+          {/* Login Button */}
           <button
-            className={`send-otp-btn ${
-              showOTPBox
-                ? otp.join('').length === 6 && !isVerifying
-                  ? 'active'
-                  : ''
-                : isValidPhone && !isLoading
-                ? 'active'
-                : ''
-            }`}
-            onClick={showOTPBox ? handleVerifyOTP : handleSendOTP}
-            disabled={
-              showOTPBox
-                ? otp.join('').length !== 6 || isVerifying
-                : !isValidPhone || isLoading
-            }
-            type="button"
+            className={`vault-submit-btn ${!isLoading && email && password ? 'active' : ''}`}
+            type="submit"
+            disabled={isLoading || !email || !password}
+            id="login-submit"
           >
-            {isLoading || isVerifying ? (
+            {isLoading ? (
               <>
-                <span className="spinner"></span>
-                <span>{isLoading ? 'Sending OTP...' : 'Verifying...'}</span>
-              </>
-            ) : showOTPBox ? (
-              <>
-                <span>Verify OTP</span>
-                <span className="arrow">✓</span>
+                <span className="vault-spinner"></span>
+                <span>Logging in...</span>
               </>
             ) : (
               <>
-                <span>Send OTP</span>
-                <span className="arrow">→</span>
+                <span>Login</span>
+                <span className="vault-btn-arrow">→</span>
               </>
             )}
           </button>
 
-          {showOTPBox && (
-            <div className="otp-box-inline">
-              <div className="otp-box-header">
-                <span className="otp-instruction">📲 Enter 6-digit OTP</span>
-              </div>
-              <div className="otp-inputs-inline">
-                {otp.map((digit, index) => (
-                  <input
-                    key={index}
-                    ref={(el) => (otpRefs.current[index] = el)}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={digit}
-                    onChange={(e) => handleOTPChange(index, e.target.value)}
-                    onKeyDown={(e) => handleOTPKeyDown(index, e)}
-                    className={`otp-digit ${digit ? 'filled' : ''}`}
-                  />
-                ))}
-              </div>
-              <div className="otp-actions-inline">
-                <button onClick={handleChangeNumber} className="otp-action-btn" type="button">
-                  ← Change Number
-                </button>
-                <button onClick={handleResendOTP} className="otp-action-btn" type="button" disabled={isLoading}>
-                  🔄 Resend OTP
-                </button>
-              </div>
-              <div className="otp-hint">
-                💡 Check backend terminal for OTP code
-              </div>
-            </div>
-          )}
-
+          {/* Messages */}
           {message.text && (
-            <div className={`message ${message.type}`}>
+            <div className={`vault-message ${message.type}`}>
               {message.text}
             </div>
           )}
+        </form>
 
-          {!message.text && (
-            <p className="helper-text">
-              We'll send a one-time password to your phone
-            </p>
-          )}
+        {/* Links */}
+        <div className="vault-login-links">
+          <p>
+            Don't have an account?{' '}
+            <button onClick={() => onSwitch('register')} className="vault-link-btn">
+              Sign up here
+            </button>
+          </p>
+          <p>
+            Forgot your password?{' '}
+            <button onClick={() => onSwitch('forgot-password')} className="vault-link-btn">
+              Reset it
+            </button>
+          </p>
         </div>
 
-        <p className="footer-text">🔒 Your data is private & secure</p>
+        {/* Footer */}
+        <div className="vault-login-footer">
+          <span>🔒</span>
+          <span>ENCRYPTED</span>
+          <span className="vault-footer-divider">•</span>
+          <span>🛡️</span>
+          <span>HIPAA COMPLIANT</span>
+          <span className="vault-footer-divider">•</span>
+          <span>✅</span>
+          <span>SECURE</span>
+        </div>
       </div>
     </div>
   );
