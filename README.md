@@ -475,7 +475,7 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 
 ## 👨‍💻 Author
 
-**Abhinendra Singh**
+**Abhinendra Singh** & 
 **Ashmit Thakur**
 <p>
   <a href="https://github.com/abhinendra9792">
