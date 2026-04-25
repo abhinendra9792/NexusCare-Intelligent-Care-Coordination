@@ -476,7 +476,12 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 ## 👨‍💻 Author
 
 **Abhinendra Singh**
-
+**Ashmit Thakur**
+<p>
+  <a href="https://github.com/abhinendra9792">
+    <img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" />
+  </a>
+</p>
 <p>
   <a href="https://github.com/AshmitThakur23">
     <img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" />
