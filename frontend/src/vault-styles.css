@@ -3,24 +3,27 @@
    =========================== */
 
 .login-vault-wrapper {
-  height: 100vh;
-  width: 100vw;
+  min-height: 100vh;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
+  padding: 2rem;
   background: #000000;
-  position: fixed;
-  top: 0;
-  left: 0;
-  overflow: hidden;
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* Animated Vault Background */
 .vault-bg {
-  position: fixed;
-  inset: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   z-index: 0;
+  pointer-events: none;
 }
 
 .vault-orb {
@@ -122,6 +125,16 @@
     radial-gradient(circle at 1px 1px, rgba(30, 58, 138, 0.15) 1px, transparent 0);
   background-size: 50px 50px;
   opacity: 0.3;
+}
+
+/* Login Page Container */
+.login-page-container {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Login Card */
@@ -816,5 +829,348 @@
   
   .country-prefix {
     justify-content: center;
+  }
+}
+
+/* ===========================
+   NEW LOGIN/REGISTER FORM STYLES
+   Dark theme compatible with vault background
+   =========================== */
+
+.vault-login-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.vault-login-card {
+  width: 100%;
+  max-width: 480px;
+  background: rgba(10, 15, 30, 0.92);
+  backdrop-filter: blur(40px);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.8),
+    0 0 80px rgba(59, 130, 246, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  animation: vault-card-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.vault-login-card::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #06b6d4 100%);
+  border-radius: 20px;
+  z-index: -1;
+  opacity: 0.3;
+  filter: blur(12px);
+  animation: symmetric-glow 6s ease infinite;
+}
+
+/* Logo */
+.vault-login-logo {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.vault-login-logo-ring {
+  width: 70px;
+  height: 70px;
+  border: 3px solid transparent;
+  border-top-color: rgba(59, 130, 246, 0.6);
+  border-right-color: rgba(6, 182, 212, 0.6);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  animation: vault-ring-rotate 4s linear infinite;
+  margin-bottom: 0.75rem;
+}
+
+.vault-login-logo-inner {
+  font-size: 32px;
+  animation: vault-ring-rotate 4s linear infinite reverse;
+}
+
+.vault-login-brand {
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+/* Hero */
+.vault-login-hero {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.vault-login-hero h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 0.5rem;
+}
+
+.vault-login-hero p {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+}
+
+/* Form */
+.vault-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.vault-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.vault-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.vault-form-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.vault-form-input {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  background: rgba(5, 10, 20, 0.8);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  color: #ffffff;
+  font-family: inherit;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.vault-form-input:focus {
+  outline: none;
+  border-color: rgba(59, 130, 246, 0.6);
+  background: rgba(10, 15, 25, 0.9);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15), 0 0 15px rgba(59, 130, 246, 0.15);
+}
+
+.vault-form-input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.vault-form-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Password wrapper */
+.vault-password-wrapper {
+  position: relative;
+}
+
+.vault-password-wrapper .vault-form-input {
+  padding-right: 3rem;
+}
+
+.vault-password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.vault-password-toggle:hover {
+  opacity: 1;
+}
+
+/* Submit Button */
+.vault-submit-btn {
+  width: 100%;
+  padding: 0.9rem 1.5rem;
+  background: rgba(30, 58, 138, 0.5);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: not-allowed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.vault-submit-btn.active {
+  background: linear-gradient(135deg, #1e3a8a, #2563eb);
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(30, 58, 138, 0.4);
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.vault-submit-btn.active:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 35px rgba(37, 99, 235, 0.5);
+}
+
+.vault-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.vault-btn-arrow {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+/* Spinner */
+.vault-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Messages */
+.vault-message {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-align: center;
+  animation: slideIn 0.3s ease;
+}
+
+.vault-message.success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.vault-message.error {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Info Box */
+.vault-info-box {
+  padding: 0.75rem 1rem;
+  background: rgba(6, 182, 212, 0.1);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+}
+
+.vault-info-box p {
+  margin: 0;
+}
+
+/* Links */
+.vault-login-links {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.vault-login-links p {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0.5rem 0;
+}
+
+.vault-link-btn {
+  background: none;
+  border: none;
+  color: #60a5fa;
+  cursor: pointer;
+  font-size: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.2s;
+  padding: 0;
+}
+
+.vault-link-btn:hover {
+  color: #93bbfc;
+}
+
+/* Footer */
+.vault-login-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(59, 130, 246, 0.1);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.vault-footer-divider {
+  color: rgba(255, 255, 255, 0.15);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .vault-login-card {
+    padding: 1.75rem;
+  }
+
+  .vault-login-hero h1 {
+    font-size: 1.4rem;
+  }
+
+  .vault-form-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
 }

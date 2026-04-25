@@ -37,7 +37,7 @@ function HealthVault({ onLogout }) {
       setViewingReport(report);
 
       // Fetch PDF from backend with authentication
-      const response = await fetch(`http://localhost:3000/api/reports/${report.report_id}/view`, {
+      const response = await fetch(`http://localhost:5000/api/reports/${report.report_id}/view`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -75,7 +75,7 @@ function HealthVault({ onLogout }) {
       
       if (!token) return;
 
-      const response = await fetch('http://localhost:3000/api/family/members', {
+      const response = await fetch('http://localhost:5000/api/family/members', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -104,7 +104,7 @@ function HealthVault({ onLogout }) {
       setFamilyLoading(true);
       const token = sessionStorage.getItem('auth_token');
       
-      const response = await fetch('http://localhost:3000/api/family/request', {
+      const response = await fetch('http://localhost:5000/api/family/request', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -141,7 +141,7 @@ function HealthVault({ onLogout }) {
     try {
       const token = sessionStorage.getItem('auth_token');
       
-      const response = await fetch(`http://localhost:3000/api/family/revoke/${linkId}`, {
+      const response = await fetch(`http://localhost:5000/api/family/revoke/${linkId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -178,7 +178,7 @@ function HealthVault({ onLogout }) {
       setShareLoading(true);
       const token = sessionStorage.getItem('auth_token');
       
-      const response = await fetch(`http://localhost:3000/api/reports/${sharingReport.report_id}/share`, {
+      const response = await fetch(`http://localhost:5000/api/reports/${sharingReport.report_id}/share`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -226,7 +226,7 @@ function HealthVault({ onLogout }) {
     try {
       const token = sessionStorage.getItem('auth_token');
       
-      const response = await fetch(`http://localhost:3000/api/reports/${report.report_id}/share-logs`, {
+      const response = await fetch(`http://localhost:5000/api/reports/${report.report_id}/share-logs`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -256,7 +256,7 @@ function HealthVault({ onLogout }) {
     try {
       const token = sessionStorage.getItem('auth_token');
       
-      const response = await fetch(`http://localhost:3000/api/reports/share/${shareId}`, {
+      const response = await fetch(`http://localhost:5000/api/reports/share/${shareId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -296,7 +296,7 @@ function HealthVault({ onLogout }) {
         return;
       }
 
-      const response = await fetch('http://localhost:3000/api/reports', {
+      const response = await fetch('http://localhost:5000/api/reports', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
